@@ -15,15 +15,22 @@ public class RenderEngine {
             final Camera camera,
             final Model mesh,
             final int width,
-            final int height)
+            final int height,
+            final Vector3 scale,
+            final Vector3 rotation,
+            final Vector3 translation
+    )
+
     {
-        Matrix4 modelMatrix = rotateScaleTranslate();
+        // Создаем матрицу модели (T * R * S)
+        Matrix4 modelMatrix = GraphicConveyor.rotateScaleTranslate(scale, rotation, translation);
+
+        // Получаем матрицы вида и проекции
         Matrix4 viewMatrix = camera.getViewMatrix();
         Matrix4 projectionMatrix = camera.getProjectionMatrix();
 
-        Matrix4 modelViewProjectionMatrix = new Matrix4(modelMatrix);
-        modelViewProjectionMatrix.mult(viewMatrix);
-        modelViewProjectionMatrix.mult(projectionMatrix);
+        // Объединяем матрицы: MVP = Projection * View * Model
+        Matrix4 mvpMatrix = projectionMatrix.mult(viewMatrix.mult(modelMatrix));
 
         final int nPolygons = mesh.polygons.size();
         for (int polygonInd = 0; polygonInd < nPolygons; ++polygonInd) {

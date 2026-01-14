@@ -1,19 +1,22 @@
 package com.cgvsu.render_engine;
+
 import com.cgvsu.Math.Matrix.Matrix4;
 import com.cgvsu.Math.Vector.Vector3;
+import com.cgvsu.Math.Vector.Vector4;
+
+import java.awt.geom.Point2D;
 
 public class GraphicConveyor {
 
-    public static Matrix4 rotateScaleTranslate() {
-        float[] matrix = new float[]{
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1};
-        return new Matrix4(matrix);
+    public static Matrix4 rotateScaleTranslate(Vector3 s, Vector3 angle, Vector3 t) {
+        Matrix4 result = scaleMatrix(s);
+        result = rotationMatrix(angle).mult(result);
+        result = translationMatrix(t).mult(result);
+        return result;
     }
 
     public static Matrix4 lookAt(Vector3 eye, Vector3 target) {
+
         return lookAt(eye, target, new Vector3(0F, 1.0F, 0F));
     }
 
@@ -55,17 +58,60 @@ public class GraphicConveyor {
         return result;
     }
 
+    //аффинные преобразования
+
+    //матрица масштабирования
+    private static Matrix4 scaleMatrix(Vector3 s){
+        return new Matrix4(
+                s.getX(), 0, 0,0,
+                0, s.getY(), 0,0,
+                0,0,s.getZ(),0,
+                0,0,0,1
+        );
+    }
+
+    //матрица поворота сразу вокруг всех осей
+    private static Matrix4 rotationMatrix(Vector3 angle){
+        float cosX = (float) Math.cos(angle.getX());
+        float sinX = (float) Math.sin(angle.getX());
+        float cosY = (float) Math.cos(angle.getY());
+        float sinY = (float) Math.sin(angle.getY());
+        float cosZ = (float) Math.cos(angle.getZ());
+        float sinZ = (float) Math.sin(angle.getZ());
+
+
+        return new Matrix4(
+                cosZ * cosY, cosZ * sinY * sinX - sinZ * cosX, cosZ * sinY * cosX + sinZ * sinX, 0,
+                sinZ * cosY, sinZ * sinY * sinX + cosZ * cosX, sinZ * sinY * cosX - cosZ * sinX, 0,
+                -sinY, cosY * sinX, cosY * cosX, 0,
+                0,0,0,1
+        );
+    }
+
+    //матрица переноса
+    private static Matrix4 translationMatrix(Vector3 t){
+        return new Matrix4(
+                1,0,0,t.getX(),
+                0,1,0,t.getY(),
+                0,0,1,t.getZ(),
+                0,0,0,1
+        );
+    }
+
     public static Vector3 multiplyMatrix4ByVector3(final Matrix4 matrix, final Vector3 vertex) {
-        final float x = (vertex.x * matrix.m00) + (vertex.y * matrix.m10) + (vertex.z * matrix.m20) + matrix.m30;
-        final float y = (vertex.x * matrix.m01) + (vertex.y * matrix.m11) + (vertex.z * matrix.m21) + matrix.m31;
-        final float z = (vertex.x * matrix.m02) + (vertex.y * matrix.m12) + (vertex.z * matrix.m22) + matrix.m32;
-        final float w = (vertex.x * matrix.m03) + (vertex.y * matrix.m13) + (vertex.z * matrix.m23) + matrix.m33;
-        return new Vector3(x / w, y / w, z / w);
+        float[] vector = vertex.getVector();
+        Vector4 vector4 = new Vector4(vector[0], vector[1], vector[2], 1);
+
+        Vector4 res = matrix.multiplyByVector(vector4);
+
+        return new Vector3(
+                res.getX() / res.getW(),
+                res.getY() / res.getW(),
+                res.getZ() / res.getW()
+        );
     }
 
-    public static Point2f vertexToPoint(final Vector3 vertex, final int width, final int height) {
-        return new Point2f(vertex.x * width + width / 2.0F, -vertex.y * height + height / 2.0F);
+    public static Point2D vertexToPoint(final Vector3 vertex, final int width, final int height) {
+        return new Point2D(vertex.getX() * width + width / 2.0F, -vertex.getY() * height + height / 2.0F);
     }
-
-
 }
