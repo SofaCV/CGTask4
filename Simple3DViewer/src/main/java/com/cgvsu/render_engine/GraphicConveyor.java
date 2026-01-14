@@ -45,21 +45,20 @@ public class GraphicConveyor {
     //система координат камеры -> плоскость проецирования
     public static Matrix4 perspective(
             final float fov,
-            final float aspectRatio,
-            final float nearPlane,
-            final float farPlane) {
-        Matrix4 result = new Matrix4();
-        float tangentMinusOnDegree = (float) (1.0F / (Math.tan(fov * 0.5F)));
-        result.m00 = tangentMinusOnDegree / aspectRatio;
-        result.m11 = tangentMinusOnDegree;
-        result.m22 = (farPlane + nearPlane) / (farPlane - nearPlane);
-        result.m23 = 1.0F;
-        result.m32 = 2 * (nearPlane * farPlane) / (nearPlane - farPlane);
-        return result;
+            final float ar,
+            final float n,
+            final float f) {
+        float tanFov = (float) Math.tan(fov);
+
+        return new Matrix4(
+                1/tanFov, 0,0,0,
+                0,1/(ar * tanFov), 0,0,
+                0,0, (f + n)/(f - n), (2 * f * n)/(n - f),
+                0,0,1,0
+        );
     }
 
     //аффинные преобразования
-
     //матрица масштабирования
     private static Matrix4 scaleMatrix(Vector3 s){
         return new Matrix4(
