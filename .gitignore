@@ -1,0 +1,71 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+*.iws
+out/
+.nb-gradle/
+.nb-gradle-properties
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/
+.m2/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+nul  # Специальный файл Windows
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# Logs
+*.log
+logs/
+
+# Temp files
+*.tmp
+*.temp
+*~
+~$*
+
+# Build
+bin/
+build/
+dist/
+gradle/
+.gradle/
+
+# IDE
+.vscode/
+*.swp
+*.swo
+*#
+.#*
+
+# Project specific
+*.obj
+*.mtl
+*.blend
+*.blend1
+*.ma
+*.mb

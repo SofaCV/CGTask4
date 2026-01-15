@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/22"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cgvsu.GuiController"
+            prefWidth="1000"
+            prefHeight="700">
+
+    <top>
+        <MenuBar>
+            <Menu text="File" mnemonicParsing="true">
+                <MenuItem text="Open Model..." mnemonicParsing="true" onAction="#onOpenModelMenuItemClick"/>
+                <MenuItem text="Save Model..." mnemonicParsing="true" onAction="#onSaveModelMenuItemClick"/>
+                <SeparatorMenuItem />
+                <MenuItem text="Exit" mnemonicParsing="true" onAction="#handleExit"/>
+            </Menu>
+            <Menu text="Camera" mnemonicParsing="true">
+                <MenuItem text="Forward (W)" mnemonicParsing="true" onAction="#handleCameraForward"/>
+                <MenuItem text="Backward (S)" mnemonicParsing="true" onAction="#handleCameraBackward"/>
+                <MenuItem text="Left (A)" mnemonicParsing="true" onAction="#handleCameraLeft"/>
+                <MenuItem text="Right (D)" mnemonicParsing="true" onAction="#handleCameraRight"/>
+                <MenuItem text="Up (Q)" mnemonicParsing="true" onAction="#handleCameraUp"/>
+                <MenuItem text="Down (E)" mnemonicParsing="true" onAction="#handleCameraDown"/>
+            </Menu>
+            <Menu text="View" mnemonicParsing="true">
+                <MenuItem text="Reset View" mnemonicParsing="true"/>
+                <CheckMenuItem text="Show Grid" mnemonicParsing="true" selected="true"/>
+                <CheckMenuItem text="Show Axes" mnemonicParsing="true" selected="true"/>
+            </Menu>
+        </MenuBar>
+    </top>
+
+    <center>
+        <AnchorPane fx:id="anchorPane" style="-fx-background-color: #2b2b2b;">
+            <Canvas fx:id="canvas"
+                    width="800"
+                    height="600"
+                    AnchorPane.topAnchor="0"
+                    AnchorPane.bottomAnchor="0"
+                    AnchorPane.leftAnchor="0"
+                    AnchorPane.rightAnchor="0"/>
+
+            <VBox alignment="CENTER" spacing="10"
+                  AnchorPane.topAnchor="10"
+                  AnchorPane.rightAnchor="10">
+                <Label text="3D Viewer" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                <Label text="Controls:" style="-fx-text-fill: #cccccc;"/>
+                <Label text="WASD - Move Camera" style="-fx-text-fill: #aaaaaa;"/>
+                <Label text="QE - Up/Down" style="-fx-text-fill: #aaaaaa;"/>
+                <Label text="Mouse - Rotate View" style="-fx-text-fill: #aaaaaa;"/>
+            </VBox>
+        </AnchorPane>
+    </center>
+
+    <bottom>
+        <HBox style="-fx-background-color: #3c3c3c; -fx-padding: 5;"
+              alignment="CENTER_LEFT"
+              spacing="10">
+            <Label fx:id="statusLabel"
+                   text="Ready to load 3D models"
+                   style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+
+            <Separator orientation="VERTICAL" prefHeight="20"/>
+
+            <HBox spacing="20">
+                <Label text="Vertices: 0" fx:id="vertexCountLabel" style="-fx-text-fill: #aaaaaa;"/>
+                <Label text="Polygons: 0" fx:id="polygonCountLabel" style="-fx-text-fill: #aaaaaa;"/>
+                <Label text="Objects: 0" fx:id="objectCountLabel" style="-fx-text-fill: #aaaaaa;"/>
+            </HBox>
+
+            <Pane HBox.hgrow="ALWAYS"/>
+
+            <Label text="FPS: 60" fx:id="fpsLabel" style="-fx-text-fill: #00ff00;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
