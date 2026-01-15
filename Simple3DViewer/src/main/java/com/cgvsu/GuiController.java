@@ -35,11 +35,74 @@ public class GuiController {
     private Model mesh = null;
 
     private Camera camera = new Camera(
-            new Vector3(0, 00, 100),
+            new Vector3(0, 0, 100),
             new Vector3(0, 0, 0),
             1.0F, 1, 0.01F, 100);
 
     private Timeline timeline;
+
+    //параметры для аффинных преобразований
+    private Vector3 scale = new Vector3(1.0f, 1.0f, 1.0f);;
+    private Vector3 rotation = new Vector3(0,0,0);
+    private Vector3 translation = new Vector3(0,0,0);
+
+
+    private double mousePrevX, mousePrevY;    // Предыдущие координаты мыши
+    private boolean isMousePressed = false;   // Нажата ли кнопка мыши
+
+    //Работа с мышью. Если действия производятся правой кнопкой, то совершается поворот, если левой - перемещение,
+    //движение колесика отвечает за масштабируемость
+    private void setupMouseHandlers() {
+        //первое нажатие
+        canvas.setOnMousePressed(event -> {
+            mousePrevX = event.getX();
+            mousePrevY = event.getY();
+            isMousePressed = true;
+        });
+
+        //второе нажатие
+        canvas.setOnMouseDragged(event -> {
+            if (!isMousePressed || mesh == null){return;}
+            // На сколько сдвинули мышь
+            double deltaX = event.getX() - mousePrevX;
+            double deltaY = event.getY() - mousePrevY;
+
+            //если нажатие было правой кнопкой
+            if (event.isPrimaryButtonDown()) {
+                float sensitivity = 0.01f;  // Чувствительность
+                rotation = new Vector3(
+                        rotation.getX() + (float) (deltaY * sensitivity),
+                        rotation.getY() + (float) (deltaX * sensitivity),
+                        rotation.getZ()
+                );
+            } else if (event.isSecondaryButtonDown()) { //если нажатие было левой кнопкой
+                float sensitivity = 0.1f;
+                translation = new Vector3(
+                        translation.getX() + (float) (deltaX * sensitivity),
+                        translation.getY() - (float) (deltaY * sensitivity),
+                        translation.getZ()
+                );
+            }
+            // Обновляем позицию для следующего кадра
+            mousePrevX = event.getX();
+            mousePrevY = event.getY();
+        });
+
+        //если крутится колесико
+        canvas.setOnScroll(event -> {
+            if (mesh == null) {return;}
+            double delta = event.getDeltaY();
+            float zoomSensitivity = 0.1f;
+
+            // Масштабируем равномерно по всем осям
+            float zoomFactor = 1 + (float)(delta * zoomSensitivity * 0.01);
+            scale = new Vector3(
+                    scale.getX() * zoomFactor,
+                    scale.getY() * zoomFactor,
+                    scale.getZ() * zoomFactor
+            );
+        });
+    }
 
     @FXML
     private void initialize() {
@@ -57,7 +120,16 @@ public class GuiController {
             camera.setAspectRatio((float) (width / height));
 
             if (mesh != null) {
-                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height);
+                RenderEngine.render(
+                        canvas.getGraphicsContext2D(),
+                        camera,
+                        mesh,
+                        (int) width,
+                        (int) height,
+                        scale,
+                        rotation,
+                        translation
+                );
             }
         });
 
