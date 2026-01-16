@@ -1,0 +1,194 @@
+.root {
+    -fx-base: #2d2d30;
+    -fx-background: #2d2d30;
+    -fx-control-inner-background: #3e3e42;
+    -fx-text-fill: #ffffff;
+    -fx-accent: #007acc;
+    -fx-focus-color: #007acc;
+}
+
+BorderPane, VBox, HBox, StackPane, AnchorPane {
+    -fx-background-color: #2d2d30;
+}
+
+MenuBar {
+    -fx-background-color: #3e3e42;
+}
+
+Menu {
+    -fx-text-fill: #ffffff;
+}
+
+Menu:hover {
+    -fx-background-color: #1c97ea;
+}
+
+MenuItem, CheckMenuItem {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: #3e3e42;
+}
+
+MenuItem:hover, CheckMenuItem:hover {
+    -fx-background-color: #1c97ea;
+}
+
+ToolBar {
+    -fx-background-color: #3e3e42;
+    -fx-border-color: #555555;
+    -fx-border-width: 0 0 1 0;
+}
+
+Button {
+    -fx-background-color: #007acc;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 15;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-cursor: hand;
+}
+
+Button:hover {
+    -fx-background-color: #1c97ea;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+Button:pressed {
+    -fx-background-color: #005a9e;
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+ToggleButton {
+    -fx-background-color: #3e3e42;
+    -fx-text-fill: #cccccc;
+    -fx-padding: 8 15;
+    -fx-background-radius: 4;
+}
+
+ToggleButton:selected {
+    -fx-background-color: #007acc;
+    -fx-text-fill: white;
+}
+
+ToggleButton:hover {
+    -fx-background-color: #4a4a4a;
+}
+
+VBox, HBox {
+    -fx-background-color: #3e3e42;
+    -fx-border-color: #555555;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 15;
+}
+
+ListView {
+    -fx-background-color: #2d2d30;
+    -fx-control-inner-background: #2d2d30;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #555555;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+}
+
+.list-cell {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: #2d2d30;
+    -fx-padding: 5 10;
+}
+
+.list-cell:selected {
+    -fx-background-color: #007acc;
+    -fx-text-fill: white;
+}
+
+.list-cell:hover {
+    -fx-background-color: #3c3c3c;
+}
+
+Label {
+    -fx-text-fill: #ffffff;
+}
+
+.label-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 14;
+}
+
+.label-subtitle {
+    -fx-text-fill: #cccccc;
+    -fx-font-weight: bold;
+    -fx-font-size: 12;
+}
+
+TextField, TextArea, ComboBox {
+    -fx-background-color: #2d2d30;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #555555;
+    -fx-border-radius: 3;
+    -fx-padding: 5;
+}
+
+TextField:focused, TextArea:focused {
+    -fx-border-color: #007acc;
+}
+
+Separator {
+    -fx-background-color: #555555;
+}
+
+Canvas {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: #007acc;
+    -fx-border-width: 2;
+    -fx-border-radius: 3;
+}
+
+.status-bar {
+    -fx-background-color: #007acc;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+CheckBox, RadioButton {
+    -fx-text-fill: #ffffff;
+}
+
+CheckBox .box, RadioButton .radio {
+    -fx-background-color: #2d2d30;
+    -fx-border-color: #555555;
+    -fx-border-radius: 3;
+}
+
+CheckBox:selected .mark, RadioButton:selected .dot {
+    -fx-background-color: #007acc;
+}
+
+Slider .track {
+    -fx-background-color: #555555;
+}
+
+Slider .thumb {
+    -fx-background-color: #007acc;
+}
+
+DialogPane {
+    -fx-background-color: #3e3e42;
+}
+
+.dialog-button {
+    -fx-background-color: #007acc;
+    -fx-text-fill: white;
+}
+
+.overlay-label {
+    -fx-text-fill: #cccccc;
+    -fx-font-size: 14;
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-background-radius: 5;
+    -fx-padding: 10;
+}
