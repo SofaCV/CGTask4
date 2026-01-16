@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Triangulator {
+
     public static List<Polygon> triangulate(Polygon polygon) {
         List<Polygon> triangles = new ArrayList<>();
         List<Integer> v = polygon.getVertexIndices();
         if (v.size() < 3) return triangles;
+
         for (int i = 1; i < v.size() - 1; i++) {
             List<Integer> tri = new ArrayList<>();
             tri.add(v.get(0));

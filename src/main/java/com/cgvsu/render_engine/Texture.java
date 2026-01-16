@@ -11,8 +11,8 @@ public class Texture {
     }
 
     public Color sample(float u, float v) {
-        int x = (int) (u * (image.getWidth() - 1));
-        int y = (int) ((1 - v) * (image.getHeight() - 1));
+        int x = (int)(u * (image.getWidth() - 1));
+        int y = (int)((1 - v) * (image.getHeight() - 1));
         return image.getPixelReader().getColor(x, y);
     }
 }
