@@ -1,6 +1,5 @@
 package com.cgvsu.render_engine;
 
-import com.cgvsu.math.Vector2f;
 import com.cgvsu.math.Vector3f;
 import com.cgvsu.model.Model;
 import com.cgvsu.model.Polygon;
@@ -15,66 +14,132 @@ public class RenderEngine {
     public static void render(GraphicsContext gc, Camera camera,
                               SceneObject object, int width, int height) {
 
-        if (object == null) {
-            gc.setFill(Color.LIGHTGRAY);
-            gc.fillRect(0, 0, width, height);
-            gc.setFill(Color.BLACK);
-            gc.fillText("Выберите модель в Outliner", width / 2 - 100, height / 2);
-            return;
-        }
-
+        // Очистка экрана
+        gc.clearRect(0, 0, width, height);
         gc.setFill(Color.WHITE);
         gc.fillRect(0, 0, width, height);
 
-        Model model = object.getModel();
-        if (model == null || model.getVertices().isEmpty() || model.getPolygons().isEmpty()) {
+        if (object == null) {
+            drawNoModel(gc, width, height);
             return;
         }
 
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(1.0);
+        Model model = object.getModel();
+        if (model == null) {
+            drawNoModel(gc, width, height);
+            return;
+        }
 
         List<Vector3f> vertices = model.getVertices();
         List<Polygon> polygons = model.getPolygons();
 
+        if (vertices == null || vertices.isEmpty()) {
+            drawNoModel(gc, width, height);
+            return;
+        }
+
+        if (polygons == null || polygons.isEmpty()) {
+            drawNoModel(gc, width, height);
+            return;
+        }
+
+        // Найдем границы модели
+        float minX = Float.MAX_VALUE;
+        float maxX = -Float.MAX_VALUE;
+        float minY = Float.MAX_VALUE;
+        float maxY = -Float.MAX_VALUE;
+
+        for (Vector3f vertex : vertices) {
+            if (vertex.x < minX) minX = vertex.x;
+            if (vertex.x > maxX) maxX = vertex.x;
+            if (vertex.y < minY) minY = vertex.y;
+            if (vertex.y > maxY) maxY = vertex.y;
+        }
+
+        // Центр модели
+        float centerX = (minX + maxX) / 2.0f;
+        float centerY = (minY + maxY) / 2.0f;
+
+        // Размер модели
+        float modelWidth = maxX - minX;
+        float modelHeight = maxY - minY;
+
+        // Автомасштабирование
+        float scale = 50.0f; // Стандартный масштаб
+        if (modelWidth > 0 && modelHeight > 0) {
+            float scaleX = (width * 0.7f) / modelWidth;
+            float scaleY = (height * 0.7f) / modelHeight;
+            scale = Math.min(scaleX, scaleY);
+            // Ограничим масштаб
+            scale = Math.max(10.0f, Math.min(500.0f, scale));
+        }
+
+        // Настройка цветов
+        gc.setStroke(Color.BLACK);
+        gc.setFill(Color.rgb(200, 200, 200));
+        gc.setLineWidth(1.0);
+
+        // Отрисовка полигонов
+        int drawnPolygons = 0;
         for (Polygon polygon : polygons) {
-            List<Integer> indices = polygon.getVertexIndices();
-            if (indices.size() < 3) continue;
-
-            double[] xPoints = new double[indices.size()];
-            double[] yPoints = new double[indices.size()];
-
-            for (int i = 0; i < indices.size(); i++) {
-                int idx = indices.get(i);
-                if (idx < 0 || idx >= vertices.size()) continue;
-
-                Vector3f vertex = vertices.get(idx);
-                Vector3f transformed = applyObjectTransform(vertex, object);
-                Vector2f screenPoint = GraphicConveyor.vertexToScreen(transformed, width, height);
-
-                xPoints[i] = screenPoint.getX();
-                yPoints[i] = screenPoint.getY();
+            List<Integer> vertexIndices = polygon.getVertexIndices();
+            if (vertexIndices == null || vertexIndices.size() < 3) {
+                continue;
             }
 
-            gc.strokePolygon(xPoints, yPoints, indices.size());
+            double[] xPoints = new double[vertexIndices.size()];
+            double[] yPoints = new double[vertexIndices.size()];
+            boolean valid = true;
+
+            for (int i = 0; i < vertexIndices.size(); i++) {
+                int vertexIndex = vertexIndices.get(i);
+                if (vertexIndex < 0 || vertexIndex >= vertices.size()) {
+                    valid = false;
+                    break;
+                }
+
+                Vector3f vertex = vertices.get(vertexIndex);
+
+                // Преобразование координат
+                float x = (vertex.x - centerX) * scale;
+                float y = (vertex.y - centerY) * scale;
+
+                // Центрирование на экране
+                xPoints[i] = x + width / 2.0;
+                yPoints[i] = height / 2.0 - y; // Инвертируем Y
+            }
+
+            if (valid) {
+                gc.fillPolygon(xPoints, yPoints, vertexIndices.size());
+                gc.strokePolygon(xPoints, yPoints, vertexIndices.size());
+                drawnPolygons++;
+            }
         }
+
+        // Отрисовка точек вершин (для отладки)
+        gc.setFill(Color.RED);
+        for (Vector3f vertex : vertices) {
+            float x = (vertex.x - centerX) * scale + width / 2.0f;
+            float y = height / 2.0f - (vertex.y - centerY) * scale;
+            gc.fillOval(x - 2, y - 2, 4, 4);
+        }
+
+        // Информация на экране
+        gc.setFill(Color.BLUE);
+        gc.fillText("Модель: " + object.getName(), 10, 20);
+        gc.fillText("Вершин: " + vertices.size(), 10, 40);
+        gc.fillText("Полигонов: " + drawnPolygons, 10, 60);
+        gc.fillText("Масштаб: " + String.format("%.1f", scale), 10, 80);
+
+        // Центр экрана
+        gc.setFill(Color.GREEN);
+        gc.fillOval(width/2 - 3, height/2 - 3, 6, 6);
     }
 
-    private static Vector3f applyObjectTransform(Vector3f v, SceneObject obj) {
-        Vector3f tv = new Vector3f(v.getX(), v.getY(), v.getZ());
-
-        tv.setX(tv.getX() * obj.getScale().getX());
-        tv.setY(tv.getY() * obj.getScale().getY());
-        tv.setZ(tv.getZ() * obj.getScale().getZ());
-
-        tv = GraphicConveyor.rotateX(tv, obj.getRotation().getX());
-        tv = GraphicConveyor.rotateY(tv, obj.getRotation().getY());
-        tv = GraphicConveyor.rotateZ(tv, obj.getRotation().getZ());
-
-        tv.setX(tv.getX() + obj.getPosition().getX());
-        tv.setY(tv.getY() + obj.getPosition().getY());
-        tv.setZ(tv.getZ() + obj.getPosition().getZ());
-
-        return tv;
+    private static void drawNoModel(GraphicsContext gc, int width, int height) {
+        gc.setFill(Color.LIGHTGRAY);
+        gc.fillRect(0, 0, width, height);
+        gc.setFill(Color.BLACK);
+        gc.fillText("Нет модели для отображения", width/2 - 100, height/2);
     }
 }

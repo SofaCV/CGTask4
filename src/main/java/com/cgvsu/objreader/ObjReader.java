@@ -22,31 +22,42 @@ public class ObjReader {
         int lineInd = 0;
         Scanner scanner = new Scanner(fileContent);
         while (scanner.hasNextLine()) {
-            final String line = scanner.nextLine();
+            final String line = scanner.nextLine().trim();
+
+            if (line.isEmpty() || line.startsWith("#")) {
+                lineInd++;
+                continue;
+            }
+
             ArrayList<String> wordsInLine = new ArrayList<>(Arrays.asList(line.split("\\s+")));
-            if (wordsInLine.isEmpty()) {
+            if (wordsInLine.isEmpty() || wordsInLine.get(0).isEmpty()) {
+                lineInd++;
                 continue;
             }
 
             final String token = wordsInLine.get(0);
             wordsInLine.remove(0);
 
-            ++lineInd;
-            switch (token) {
-                case OBJ_VERTEX_TOKEN:
-                    result.vertices.add(parseVertex(wordsInLine, lineInd));
-                    break;
-                case OBJ_TEXTURE_TOKEN:
-                    result.textureVertices.add(parseTextureVertex(wordsInLine, lineInd));
-                    break;
-                case OBJ_NORMAL_TOKEN:
-                    result.normals.add(parseNormal(wordsInLine, lineInd));
-                    break;
-                case OBJ_FACE_TOKEN:
-                    result.polygons.add(parseFace(wordsInLine, lineInd));
-                    break;
-                default:
-                    break;
+            lineInd++;
+            try {
+                switch (token) {
+                    case OBJ_VERTEX_TOKEN:
+                        result.vertices.add(parseVertex(wordsInLine, lineInd));
+                        break;
+                    case OBJ_TEXTURE_TOKEN:
+                        result.textureVertices.add(parseTextureVertex(wordsInLine, lineInd));
+                        break;
+                    case OBJ_NORMAL_TOKEN:
+                        result.normals.add(parseNormal(wordsInLine, lineInd));
+                        break;
+                    case OBJ_FACE_TOKEN:
+                        result.polygons.add(parseFace(wordsInLine, lineInd));
+                        break;
+                    default:
+                        break;
+                }
+            } catch (ObjReaderException e) {
+                throw new ObjReaderException("Error parsing OBJ file on line: " + lineInd + ". " + e.getMessage(), lineInd);
             }
         }
 
@@ -54,106 +65,157 @@ public class ObjReader {
     }
 
     protected static Vector3f parseVertex(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
+        wordsInLineWithoutToken.removeIf(String::isEmpty);
+
+        if (wordsInLineWithoutToken.size() < 3) {
+            throw new ObjReaderException("Too few vertex arguments. Expected 3, got " + wordsInLineWithoutToken.size(), lineInd);
+        }
+
         try {
-            return new Vector3f(
-                    Float.parseFloat(wordsInLineWithoutToken.get(0)),
-                    Float.parseFloat(wordsInLineWithoutToken.get(1)),
-                    Float.parseFloat(wordsInLineWithoutToken.get(2)));
+            float x = parseFloatSafe(wordsInLineWithoutToken.get(0), lineInd);
+            float y = parseFloatSafe(wordsInLineWithoutToken.get(1), lineInd);
+            float z = parseFloatSafe(wordsInLineWithoutToken.get(2), lineInd);
 
-        } catch(NumberFormatException e) {
-            throw new ObjReaderException("Failed to parse float value.", lineInd);
-
+            return new Vector3f(x, y, z);
         } catch(IndexOutOfBoundsException e) {
             throw new ObjReaderException("Too few vertex arguments.", lineInd);
         }
     }
 
     protected static Vector2f parseTextureVertex(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
+        wordsInLineWithoutToken.removeIf(String::isEmpty);
+
+        if (wordsInLineWithoutToken.size() < 2) {
+            throw new ObjReaderException("Too few texture vertex arguments. Expected at least 2, got " + wordsInLineWithoutToken.size(), lineInd);
+        }
+
         try {
-            return new Vector2f(
-                    Float.parseFloat(wordsInLineWithoutToken.get(0)),
-                    Float.parseFloat(wordsInLineWithoutToken.get(1)));
+            float u = parseFloatSafe(wordsInLineWithoutToken.get(0), lineInd);
+            float v = parseFloatSafe(wordsInLineWithoutToken.get(1), lineInd);
 
-        } catch(NumberFormatException e) {
-            throw new ObjReaderException("Failed to parse float value.", lineInd);
-
+            return new Vector2f(u, v);
         } catch(IndexOutOfBoundsException e) {
             throw new ObjReaderException("Too few texture vertex arguments.", lineInd);
         }
     }
 
     protected static Vector3f parseNormal(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
+        wordsInLineWithoutToken.removeIf(String::isEmpty);
+
+        if (wordsInLineWithoutToken.size() < 3) {
+            throw new ObjReaderException("Too few normal arguments. Expected 3, got " + wordsInLineWithoutToken.size(), lineInd);
+        }
+
         try {
-            return new Vector3f(
-                    Float.parseFloat(wordsInLineWithoutToken.get(0)),
-                    Float.parseFloat(wordsInLineWithoutToken.get(1)),
-                    Float.parseFloat(wordsInLineWithoutToken.get(2)));
+            float x = parseFloatSafe(wordsInLineWithoutToken.get(0), lineInd);
+            float y = parseFloatSafe(wordsInLineWithoutToken.get(1), lineInd);
+            float z = parseFloatSafe(wordsInLineWithoutToken.get(2), lineInd);
 
-        } catch(NumberFormatException e) {
-            throw new ObjReaderException("Failed to parse float value.", lineInd);
-
+            return new Vector3f(x, y, z);
         } catch(IndexOutOfBoundsException e) {
             throw new ObjReaderException("Too few normal arguments.", lineInd);
         }
     }
 
-    protected static Polygon parseFace(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
-        ArrayList<Integer> onePolygonVertexIndices = new ArrayList<>();
-        ArrayList<Integer> onePolygonTextureVertexIndices = new ArrayList<>();
-        ArrayList<Integer> onePolygonNormalIndices = new ArrayList<>();
+    private static float parseFloatSafe(String value, int lineInd) {
+        try {
+            String cleanedValue = value
+                    .replace('Φ', ' ')
+                    .replace('φ', ' ')
+                    .replace(',', '.')
+                    .trim();
 
-        for (String s : wordsInLineWithoutToken) {
-            parseFaceWord(s, onePolygonVertexIndices, onePolygonTextureVertexIndices, onePolygonNormalIndices, lineInd);
+            cleanedValue = cleanedValue.replaceAll("[^0-9.Ee-]", "");
+
+            if (cleanedValue.isEmpty()) {
+                throw new ObjReaderException("Empty coordinate value: '" + value + "'", lineInd);
+            }
+
+            return Float.parseFloat(cleanedValue);
+        } catch (NumberFormatException e) {
+            throw new ObjReaderException("Failed to parse coordinate value: '" + value + "'", lineInd);
+        }
+    }
+
+    protected static Polygon parseFace(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
+        wordsInLineWithoutToken.removeIf(String::isEmpty);
+
+        if (wordsInLineWithoutToken.isEmpty()) {
+            throw new ObjReaderException("Face definition is empty", lineInd);
         }
 
-        if (onePolygonVertexIndices.size() < 3) {
-            throw new ObjReaderException("Polygon must have at least 3 vertices.", lineInd);
+        ArrayList<Integer> vertexIndices = new ArrayList<>();
+        ArrayList<Integer> textureIndices = new ArrayList<>();
+        ArrayList<Integer> normalIndices = new ArrayList<>();
+
+        for (String s : wordsInLineWithoutToken) {
+            if (!s.trim().isEmpty()) {
+                parseFaceWord(s, vertexIndices, textureIndices, normalIndices, lineInd);
+            }
+        }
+
+        if (vertexIndices.size() < 3) {
+            throw new ObjReaderException("Polygon must have at least 3 vertices. Found " + vertexIndices.size(), lineInd);
         }
 
         Polygon result = new Polygon();
-        result.setVertexIndices(onePolygonVertexIndices);
-        result.setTextureVertexIndices(onePolygonTextureVertexIndices.isEmpty() ? null : onePolygonTextureVertexIndices);
-        result.setNormalIndices(onePolygonNormalIndices.isEmpty() ? null : onePolygonNormalIndices);
+        result.setVertexIndices(vertexIndices);
+        result.setTextureVertexIndices(textureIndices);
+        result.setNormalIndices(normalIndices);
 
         return result;
     }
 
     protected static void parseFaceWord(
             String wordInLine,
-            ArrayList<Integer> onePolygonVertexIndices,
-            ArrayList<Integer> onePolygonTextureVertexIndices,
-            ArrayList<Integer> onePolygonNormalIndices,
+            ArrayList<Integer> vertexIndices,
+            ArrayList<Integer> textureIndices,
+            ArrayList<Integer> normalIndices,
             int lineInd) {
         try {
-            String[] wordIndices = wordInLine.split("/");
-            switch (wordIndices.length) {
-                case 1:
-                    onePolygonVertexIndices.add(Integer.parseInt(wordIndices[0]) - 1);
-                    break;
-                case 2:
-                    onePolygonVertexIndices.add(Integer.parseInt(wordIndices[0]) - 1);
-                    onePolygonTextureVertexIndices.add(Integer.parseInt(wordIndices[1]) - 1);
-                    break;
-                case 3:
-                    onePolygonVertexIndices.add(Integer.parseInt(wordIndices[0]) - 1);
+            wordInLine = wordInLine.trim();
 
-                    if (!wordIndices[1].isEmpty()) {
-                        onePolygonTextureVertexIndices.add(Integer.parseInt(wordIndices[1]) - 1);
-                    }
+            if (wordInLine.isEmpty()) {
+                throw new ObjReaderException("Empty face element", lineInd);
+            }
 
-                    if (!wordIndices[2].isEmpty()) {
-                        onePolygonNormalIndices.add(Integer.parseInt(wordIndices[2]) - 1);
-                    }
-                    break;
-                default:
-                    throw new ObjReaderException("Invalid element size.", lineInd);
+            String[] wordIndices = wordInLine.split("/", -1);
+
+            if (wordIndices.length > 3) {
+                throw new ObjReaderException("Invalid element size: " + wordIndices.length + " parts", lineInd);
+            }
+
+            if (wordIndices[0].isEmpty()) {
+                throw new ObjReaderException("Missing vertex index in face element", lineInd);
+            }
+
+            int vertexIndex = parseIntSafe(wordIndices[0], lineInd) - 1;
+            vertexIndices.add(vertexIndex);
+
+            if (wordIndices.length >= 2 && !wordIndices[1].isEmpty()) {
+                int textureIndex = parseIntSafe(wordIndices[1], lineInd) - 1;
+                textureIndices.add(textureIndex);
+            }
+
+            if (wordIndices.length == 3 && !wordIndices[2].isEmpty()) {
+                int normalIndex = parseIntSafe(wordIndices[2], lineInd) - 1;
+                normalIndices.add(normalIndex);
             }
 
         } catch(NumberFormatException e) {
-            throw new ObjReaderException("Failed to parse int value.", lineInd);
-
+            throw new ObjReaderException("Failed to parse int value in face element: '" + wordInLine + "'", lineInd);
         } catch(IndexOutOfBoundsException e) {
-            throw new ObjReaderException("Too few arguments.", lineInd);
+            throw new ObjReaderException("Too few arguments in face element.", lineInd);
+        } catch (Exception e) {
+            throw new ObjReaderException("Unexpected error in face parsing: " + e.getMessage(), lineInd);
+        }
+    }
+
+    private static int parseIntSafe(String value, int lineInd) {
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            throw new ObjReaderException("Failed to parse index: '" + value + "'", lineInd);
         }
     }
 }

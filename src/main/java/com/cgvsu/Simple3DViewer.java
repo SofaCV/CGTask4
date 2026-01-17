@@ -3,6 +3,8 @@ package com.cgvsu;
 import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.objreader.ObjReaderException;
+import com.cgvsu.render_engine.Camera;
+import com.cgvsu.scene.SceneManager;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -11,6 +13,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -24,6 +27,11 @@ import java.nio.file.Files;
 import javafx.scene.input.*;
 
 public class Simple3DViewer extends Application {
+    private SceneManager sceneManager;
+    private Scene currentScene;
+    private Camera camera;
+    private GraphicsContext gc;
+    private Timeline renderLoop;
     private UIManager uiManager;
     private ThemeManager themeManager;
     private AnimationManager animationManager;
