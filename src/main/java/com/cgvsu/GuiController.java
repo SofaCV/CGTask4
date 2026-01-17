@@ -30,7 +30,6 @@ public class GuiController {
     @FXML
     private Label statusLabel;
 
-    // Новые поля для работы с моделью
     private GraphicsContext gc;
     private Model currentModel;
     private AnimationTimer renderTimer;
@@ -42,16 +41,14 @@ public class GuiController {
     @FXML
     private void onOpenModelMenuItemClick(ActionEvent event) {
         statusLabel.setText("Opening 3D model...");
-        System.out.println("=== OPEN MODEL ===");
+        System.out.println("OPEN MODEL");
 
-        // Диалог выбора файла
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open 3D Model File");
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("OBJ Files", "*.obj")
         );
 
-        // Указываем начальную папку
         File modelsDir = new File("models");
         if (!modelsDir.exists()) {
             modelsDir.mkdir();
@@ -73,7 +70,6 @@ public class GuiController {
             System.out.println("Loading file: " + file.getAbsolutePath());
             System.out.println("File size: " + file.length() + " bytes");
 
-            // Проверяем файл
             if (!file.exists()) {
                 statusLabel.setText("File not found");
                 System.err.println("File does not exist");
@@ -86,36 +82,30 @@ public class GuiController {
                 return;
             }
 
-            // Читаем содержимое
             String content = Files.readString(file.toPath());
 
-            // Простая проверка на пустой файл
             if (content.trim().isEmpty()) {
                 statusLabel.setText("File is empty");
                 System.err.println("File contains only whitespace");
                 return;
             }
 
-            // Выводим первые 10 строк для отладки
-            System.out.println("=== FILE CONTENT (first 10 lines) ===");
+            System.out.println("FILE CONTENT (first 10 lines)");
             String[] lines = content.split("\n");
             for (int i = 0; i < Math.min(10, lines.length); i++) {
                 System.out.println((i+1) + ": " + lines[i].trim());
             }
-            System.out.println("=== END FILE CONTENT ===");
+            System.out.println("END FILE CONTENT");
 
-            // Пробуем загрузить модель
             System.out.println("Calling ObjReader.read()...");
             currentModel = ObjReader.read(content);
 
-            // Успешно загружено
             statusLabel.setText("Loaded: " + file.getName());
-            System.out.println("=== MODEL LOADED SUCCESSFULLY ===");
+            System.out.println("MODEL LOADED SUCCESSFULLY");
             System.out.println("Model name: " + file.getName());
             System.out.println("Vertices: " + currentModel.vertices.size());
             System.out.println("Polygons: " + currentModel.polygons.size());
 
-            // Выводим информацию о первых вершинах
             if (!currentModel.vertices.isEmpty()) {
                 System.out.println("First 3 vertices:");
                 for (int i = 0; i < Math.min(3, currentModel.vertices.size()); i++) {
@@ -129,7 +119,6 @@ public class GuiController {
                         currentModel.polygons.get(0).getVertexIndices());
             }
 
-            // Автоматически центрируем модель
             centerModel();
 
         } catch (IOException e) {
@@ -140,7 +129,6 @@ public class GuiController {
             statusLabel.setText("Invalid OBJ format");
             System.err.println("OBJ Error: " + e.getMessage());
 
-            // Показываем сообщение об ошибке
             showErrorMessage("OBJ Parsing Error",
                     "Cannot parse the OBJ file: " + file.getName(),
                     e.getMessage());
@@ -157,9 +145,8 @@ public class GuiController {
             return;
         }
 
-        System.out.println("=== CENTERING MODEL ===");
+        System.out.println("CENTERING MODEL");
 
-        // Находим границы модели
         float minX = Float.MAX_VALUE, maxX = Float.MIN_VALUE;
         float minY = Float.MAX_VALUE, maxY = Float.MIN_VALUE;
 
@@ -174,19 +161,16 @@ public class GuiController {
         System.out.println("  X: " + minX + " to " + maxX + " (width: " + (maxX - minX) + ")");
         System.out.println("  Y: " + minY + " to " + maxY + " (height: " + (maxY - minY) + ")");
 
-        // Вычисляем центр
         float centerX = (minX + maxX) / 2;
         float centerY = (minY + maxY) / 2;
 
         System.out.println("Model center: (" + centerX + ", " + centerY + ")");
 
-        // Центрируем (смещаем модель так, чтобы центр был в 0,0)
         offsetX = -centerX;
         offsetY = -centerY;
 
         System.out.println("Offsets: X=" + offsetX + ", Y=" + offsetY);
 
-        // Подбираем масштаб - УВЕЛИЧИВАЕМ МАСШТАБ В 2 РАЗА
         float width = maxX - minX;
         float height = maxY - minY;
         float maxSize = Math.max(width, height);
@@ -195,23 +179,20 @@ public class GuiController {
         System.out.println("Canvas size: " + canvas.getWidth() + "x" + canvas.getHeight());
 
         if (maxSize > 0) {
-            // Увеличиваем масштаб! Раньше было 0.8, теперь 0.4 = в 2 раза крупнее
             scale = (float) Math.min(canvas.getWidth(), canvas.getHeight()) * 0.4f / maxSize;
             System.out.println("Auto scale calculated: " + scale);
         } else {
-            // Если модель очень маленькая, используем большой масштаб
             scale = 200.0f;
             System.out.println("Using fixed scale: " + scale);
         }
 
-        // Если масштаб слишком маленький, увеличиваем его
         if (scale < 10.0f) {
             scale = 100.0f;
             System.out.println("Scale too small, using: " + scale);
         }
 
         System.out.println("Final scale: " + scale);
-        System.out.println("=== CENTERING COMPLETE ===");
+        System.out.println("CENTERING COMPLETE");
     }
 
     private void showErrorMessage(String title, String header, String content) {
@@ -308,17 +289,14 @@ public class GuiController {
 
     @FXML
     private void initialize() {
-        System.out.println("=== GUI CONTROLLER INITIALIZED ===");
+        System.out.println("GUI CONTROLLER INITIALIZED");
         System.out.println("Canvas loaded: " + canvas.getWidth() + "x" + canvas.getHeight());
 
         if (canvas != null) {
-            // Получаем GraphicsContext
             gc = canvas.getGraphicsContext2D();
 
-            // Настраиваем обработку мыши
             setupMouseHandlers();
 
-            // Запускаем цикл рендеринга
             startRenderLoop();
         }
 
@@ -372,24 +350,18 @@ public class GuiController {
         renderTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                // Очищаем холст
                 gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
-                // Рисуем темный фон
                 gc.setFill(Color.rgb(25, 25, 25));
                 gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
-                // Рисуем сетку
                 drawGrid();
 
-                // Рисуем оси координат
                 drawAxes();
 
-                // Рисуем модель, если она есть
                 if (currentModel != null) {
                     drawModel();
                 } else {
-                    // Показываем сообщение, если модель не загружена
                     gc.setFill(Color.WHITE);
                     gc.setFont(javafx.scene.text.Font.font(14));
                     gc.fillText("No model loaded. Use File → Open Model",
@@ -409,12 +381,10 @@ public class GuiController {
         double centerX = canvas.getWidth() / 2;
         double centerY = canvas.getHeight() / 2;
 
-        // Вертикальные линии
         for (double x = centerX % gridSize; x < canvas.getWidth(); x += gridSize) {
             gc.strokeLine(x, 0, x, canvas.getHeight());
         }
 
-        // Горизонтальные линии
         for (double y = centerY % gridSize; y < canvas.getHeight(); y += gridSize) {
             gc.strokeLine(0, y, canvas.getWidth(), y);
         }
@@ -424,20 +394,17 @@ public class GuiController {
         double centerX = canvas.getWidth() / 2;
         double centerY = canvas.getHeight() / 2;
 
-        // Ось X (красная)
         gc.setStroke(Color.RED);
         gc.setLineWidth(2);
         gc.strokeLine(centerX, centerY, centerX + 80, centerY);
         gc.setFill(Color.RED);
         gc.fillText("X", centerX + 85, centerY + 5);
 
-        // Ось Y (зеленая)
         gc.setStroke(Color.GREEN);
         gc.strokeLine(centerX, centerY, centerX, centerY - 80);
         gc.setFill(Color.GREEN);
         gc.fillText("Y", centerX + 5, centerY - 85);
 
-        // Ось Z (синяя)
         gc.setStroke(Color.BLUE);
         gc.strokeLine(centerX, centerY, centerX - 56, centerY + 56);
         gc.setFill(Color.BLUE);
@@ -449,10 +416,9 @@ public class GuiController {
             return;
         }
 
-        System.out.println("=== DRAWING MODEL ===");
+        System.out.println("DRAWING MODEL");
         System.out.println("Scale: " + scale + ", OffsetX: " + offsetX + ", OffsetY: " + offsetY);
 
-        // Проверяем данные модели
         if (currentModel.vertices.isEmpty()) {
             System.out.println("No vertices in model!");
             return;
@@ -463,9 +429,8 @@ public class GuiController {
             return;
         }
 
-        // Рисуем полигоны как каркас - ТОЛЩЕ И ЯРЧЕ
         gc.setStroke(Color.CYAN);
-        gc.setLineWidth(2.0); // Увеличили толщину
+        gc.setLineWidth(2.0);
 
         int polygonsDrawn = 0;
         int linesDrawn = 0;
@@ -481,22 +446,18 @@ public class GuiController {
         System.out.println("Polygons drawn: " + polygonsDrawn + "/" + currentModel.polygons.size());
         System.out.println("Lines drawn: " + linesDrawn);
 
-        // Рисуем вершины как точки - КРУПНЕЕ
         gc.setFill(Color.YELLOW);
         int verticesDrawn = 0;
 
         for (int i = 0; i < currentModel.vertices.size(); i++) {
             com.cgvsu.math.Vector3f vertex = currentModel.vertices.get(i);
 
-            // Преобразуем координаты
             double screenX = canvas.getWidth() / 2 + (vertex.x + offsetX) * scale;
             double screenY = canvas.getHeight() / 2 - (vertex.y + offsetY) * scale;
 
-            // Рисуем точку (увеличили размер)
             gc.fillOval(screenX - 3, screenY - 3, 6, 6);
             verticesDrawn++;
 
-            // Выводим координаты первых 3 вершин для отладки
             if (i < 3) {
                 System.out.println("Vertex " + i + " world: (" + vertex.x + ", " + vertex.y +
                         ") screen: (" + screenX + ", " + screenY + ")");
@@ -505,16 +466,14 @@ public class GuiController {
 
         System.out.println("Vertices drawn: " + verticesDrawn + "/" + currentModel.vertices.size());
 
-        // Если ничего не нарисовалось, рисуем тестовую фигуру
         if (polygonsDrawn == 0 && linesDrawn == 0) {
             System.out.println("WARNING: Model not visible! Drawing test shape...");
             drawTestShape();
         }
 
-        // Рисуем информацию о модели
         drawModelInfo();
 
-        System.out.println("=== DRAWING COMPLETE ===");
+        System.out.println("DRAWING COMPLETE");
     }
 
     private int drawPolygon(com.cgvsu.model.Polygon polygon) {
@@ -530,7 +489,6 @@ public class GuiController {
             int idx1 = vertexIndices.get(i);
             int idx2 = vertexIndices.get((i + 1) % vertexCount);
 
-            // Проверяем индексы
             if (idx1 < 0 || idx1 >= currentModel.vertices.size() ||
                     idx2 < 0 || idx2 >= currentModel.vertices.size()) {
                 continue;
@@ -539,13 +497,11 @@ public class GuiController {
             com.cgvsu.math.Vector3f v1 = currentModel.vertices.get(idx1);
             com.cgvsu.math.Vector3f v2 = currentModel.vertices.get(idx2);
 
-            // Преобразуем координаты
             double x1 = canvas.getWidth() / 2 + (v1.x + offsetX) * scale;
             double y1 = canvas.getHeight() / 2 - (v1.y + offsetY) * scale;
             double x2 = canvas.getWidth() / 2 + (v2.x + offsetX) * scale;
             double y2 = canvas.getHeight() / 2 - (v2.y + offsetY) * scale;
 
-            // Рисуем линию
             gc.strokeLine(x1, y1, x2, y2);
             linesDrawn++;
         }
@@ -554,7 +510,6 @@ public class GuiController {
     }
 
     private void drawTestShape() {
-        // Рисуем красный треугольник в центре, чтобы убедиться, что рисование работает
         gc.setStroke(Color.RED);
         gc.setLineWidth(3.0);
 
@@ -566,7 +521,6 @@ public class GuiController {
         gc.strokeLine(centerX + size, centerY + size, centerX - size, centerY + size);
         gc.strokeLine(centerX - size, centerY + size, centerX, centerY - size);
 
-        // Подпись
         gc.setFill(Color.RED);
         gc.fillText("TEST SHAPE - Model not visible", centerX - 80, centerY - size - 10);
     }
@@ -574,7 +528,6 @@ public class GuiController {
     private void drawModelInfo() {
         if (currentModel == null) return;
 
-        // Рисуем информацию о модели в углу экрана
         gc.setFill(Color.WHITE);
         gc.setFont(javafx.scene.text.Font.font(12));
 
@@ -585,7 +538,6 @@ public class GuiController {
 
         gc.fillText(info, 10, 20);
 
-        // Если модель есть, но не видна - подсказка
         if (currentModel.vertices.size() > 0 && currentModel.polygons.size() > 0) {
             gc.fillText("Use mouse: drag to move, scroll to zoom", 10, 40);
             gc.fillText("Buttons: WASD to move, Q/E to zoom", 10, 60);

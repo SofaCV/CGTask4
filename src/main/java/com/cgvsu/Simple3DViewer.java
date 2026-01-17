@@ -389,10 +389,8 @@ public class Simple3DViewer extends Application {
 
             statusLabel.setText("Loading: " + file.getName() + "...");
 
-            // Проверяем первые несколько строк файла для валидации
             String fileContent = Files.readString(file.toPath());
 
-            // Дополнительная проверка формата файла
             if (!isValidObjFormat(fileContent)) {
                 AlertManager.showError("Invalid OBJ Format",
                         "The file does not appear to be a valid OBJ file.\n" +
@@ -427,7 +425,7 @@ public class Simple3DViewer extends Application {
                     ae -> statusLabel.setStyle("-fx-text-fill: #ffffff; -fx-font-weight: normal;")
             ));
             timeline.play();
-            e.printStackTrace(); // Для отладки
+            e.printStackTrace();
         } catch (ObjReaderException e) {
             int lineNumber = extractLineNumber(e);
             AlertManager.showObjReaderError(
@@ -453,23 +451,21 @@ public class Simple3DViewer extends Application {
                             "\n\nError: " + e.getClass().getSimpleName() +
                             "\nMessage: " + e.getMessage());
             statusLabel.setText("Load failed");
-            e.printStackTrace(); // Для отладки
+            e.printStackTrace();
         }
     }
 
-    // Добавьте этот вспомогательный метод для проверки формата OBJ
     private boolean isValidObjFormat(String content) {
         if (content == null || content.trim().isEmpty()) {
             return false;
         }
 
-        // Проверяем, содержит ли файл хотя бы одну вершину
         String[] lines = content.split("\n");
         boolean hasVertex = false;
 
         for (String line : lines) {
             line = line.trim();
-            if (line.startsWith("v ")) { // Вершина
+            if (line.startsWith("v ")) {
                 hasVertex = true;
                 break;
             }

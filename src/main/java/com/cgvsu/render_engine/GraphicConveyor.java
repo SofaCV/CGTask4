@@ -5,19 +5,16 @@ import com.cgvsu.math.Vector3f;
 
 public class GraphicConveyor {
 
-    private static final float SCALE_FACTOR = 2.0f; // Увеличил масштаб
+    private static final float SCALE_FACTOR = 2.0f;
 
     public static Vector2f vertexToScreen(Vector3f vertex, int screenWidth, int screenHeight) {
-        // Упрощенная изометрическая проекция
         float x = vertex.getX() * SCALE_FACTOR;
         float y = vertex.getY() * SCALE_FACTOR;
         float z = vertex.getZ() * SCALE_FACTOR;
 
-        // Изометрическая проекция
-        float screenX = (x - z) * 0.7071f; // cos 45°
-        float screenY = y + (x + z) * 0.4082f; // sin 30°
+        float screenX = (x - z) * 0.7071f;
+        float screenY = y + (x + z) * 0.4082f;
 
-        // Центрирование
         screenX += screenWidth / 2.0f;
         screenY = screenHeight / 2.0f - screenY;
 

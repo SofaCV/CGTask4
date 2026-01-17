@@ -14,7 +14,6 @@ public class RenderEngine {
     public static void render(GraphicsContext gc, Camera camera,
                               SceneObject object, int width, int height) {
 
-        // Очистка экрана
         gc.clearRect(0, 0, width, height);
         gc.setFill(Color.WHITE);
         gc.fillRect(0, 0, width, height);
@@ -43,7 +42,6 @@ public class RenderEngine {
             return;
         }
 
-        // Найдем границы модели
         float minX = Float.MAX_VALUE;
         float maxX = -Float.MAX_VALUE;
         float minY = Float.MAX_VALUE;
@@ -56,30 +54,24 @@ public class RenderEngine {
             if (vertex.y > maxY) maxY = vertex.y;
         }
 
-        // Центр модели
         float centerX = (minX + maxX) / 2.0f;
         float centerY = (minY + maxY) / 2.0f;
 
-        // Размер модели
         float modelWidth = maxX - minX;
         float modelHeight = maxY - minY;
 
-        // Автомасштабирование
-        float scale = 50.0f; // Стандартный масштаб
+        float scale = 50.0f;
         if (modelWidth > 0 && modelHeight > 0) {
             float scaleX = (width * 0.7f) / modelWidth;
             float scaleY = (height * 0.7f) / modelHeight;
             scale = Math.min(scaleX, scaleY);
-            // Ограничим масштаб
             scale = Math.max(10.0f, Math.min(500.0f, scale));
         }
 
-        // Настройка цветов
         gc.setStroke(Color.BLACK);
         gc.setFill(Color.rgb(200, 200, 200));
         gc.setLineWidth(1.0);
 
-        // Отрисовка полигонов
         int drawnPolygons = 0;
         for (Polygon polygon : polygons) {
             List<Integer> vertexIndices = polygon.getVertexIndices();
@@ -100,13 +92,11 @@ public class RenderEngine {
 
                 Vector3f vertex = vertices.get(vertexIndex);
 
-                // Преобразование координат
                 float x = (vertex.x - centerX) * scale;
                 float y = (vertex.y - centerY) * scale;
 
-                // Центрирование на экране
                 xPoints[i] = x + width / 2.0;
-                yPoints[i] = height / 2.0 - y; // Инвертируем Y
+                yPoints[i] = height / 2.0 - y;
             }
 
             if (valid) {
@@ -116,7 +106,6 @@ public class RenderEngine {
             }
         }
 
-        // Отрисовка точек вершин (для отладки)
         gc.setFill(Color.RED);
         for (Vector3f vertex : vertices) {
             float x = (vertex.x - centerX) * scale + width / 2.0f;
@@ -124,14 +113,12 @@ public class RenderEngine {
             gc.fillOval(x - 2, y - 2, 4, 4);
         }
 
-        // Информация на экране
         gc.setFill(Color.BLUE);
         gc.fillText("Модель: " + object.getName(), 10, 20);
         gc.fillText("Вершин: " + vertices.size(), 10, 40);
         gc.fillText("Полигонов: " + drawnPolygons, 10, 60);
         gc.fillText("Масштаб: " + String.format("%.1f", scale), 10, 80);
 
-        // Центр экрана
         gc.setFill(Color.GREEN);
         gc.fillOval(width/2 - 3, height/2 - 3, 6, 6);
     }
