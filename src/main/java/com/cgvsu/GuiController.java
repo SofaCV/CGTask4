@@ -304,7 +304,7 @@ public class GuiController {
             statusLabel.setText("Ready to load 3D models");
         }
 
-        System.out.println("=== INITIALIZATION COMPLETE ===");
+        System.out.println("INITIALIZATION COMPLETE");
     }
 
     private void setupMouseHandlers() {

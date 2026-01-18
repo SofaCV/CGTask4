@@ -1,6 +1,9 @@
 package com.cgvsu.render_engine;
 
 import com.cgvsu.math.Vector3f;
+import com.cgvsu.scene.EditModeManager;
+import com.cgvsu.scene.SimpleSceneRenderer;
+import javafx.scene.canvas.GraphicsContext;
 
 public class Camera {
     private Vector3f position;

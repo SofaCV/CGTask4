@@ -410,7 +410,6 @@ public class Simple3DViewer extends Application {
             onModelLoadedSuccessfully(file, model);
 
         } catch (NullPointerException e) {
-            // Более детальное сообщение об ошибке
             AlertManager.showError("Parser Error - Null Pointer",
                     "Cannot parse the OBJ file.\n" +
                             "Possible issues:\n" +

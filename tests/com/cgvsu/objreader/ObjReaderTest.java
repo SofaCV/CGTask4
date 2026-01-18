@@ -25,7 +25,7 @@ public class ObjReaderTest {
     public void testParseVertex02_WrongValues() {
         ArrayList<String> words = new ArrayList<>(Arrays.asList("1.01", "1.02", "1.03"));
         Vector3f result = ObjReader.parseVertex(words, 5);
-        Vector3f expected = new Vector3f(1.01f, 1.02f, 1.10f); // Другое Z
+        Vector3f expected = new Vector3f(1.01f, 1.02f, 1.10f);
         Assertions.assertNotEquals(expected.getZ(), result.getZ(), 0.0001f);
     }
 
